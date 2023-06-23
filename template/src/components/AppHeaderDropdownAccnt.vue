@@ -40,13 +40,15 @@
       <CDropdownItem>
         <CIcon icon="cil-shield-alt" /> Lock Account
       </CDropdownItem>
-      <CDropdownItem> <CIcon icon="cil-lock-locked" /> Logout </CDropdownItem>
+      <CDropdownItem @click.prevent="logOut()"> 
+        <CIcon icon="cil-lock-locked" /> Logout 
+      </CDropdownItem>
     </CDropdownMenu>
   </CDropdown>
 </template>
 
 <script>
-import avatar from '@/assets/images/avatars/8.jpg'
+import avatar from '@/assets/images/avatars/avatar-default.jpg'
 export default {
   name: 'AppHeaderDropdownAccnt',
   setup() {
@@ -55,5 +57,11 @@ export default {
       itemsCount: 42,
     }
   },
+  method: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/login');
+    }
+  }
 }
 </script>

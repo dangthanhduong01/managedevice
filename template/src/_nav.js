@@ -1,7 +1,7 @@
 export default [
   {
     component: 'CNavItem',
-    name: 'Dashboard',
+    name: 'Tổng quan',
     to: '/dashboard',
     icon: 'cil-speedometer',
     badge: {
@@ -12,7 +12,22 @@ export default [
   {
     component: 'CNavItem',
     name: 'Quản lí dự án',
-    to: '/duan',
+    to: '/allProject',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Quản lí thiết bị',
+    to: '/allDevice',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Quản lí phần mềm',
+    to: '/allSoftware',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Quản lí tài sản phòng',
+    to: '/room',
   },
   // {
   //   component: 'CNavItem',

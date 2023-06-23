@@ -1,8 +1,9 @@
 import AuthService from '../services/service'
 
 const user = JSON.parse(localStorage.getItem('user'));
-const initialState = user ? {status:{loggedIn: true}, user } 
-                          : {status:{loggedIn: false}, user: null };
+
+const initialState = user ? {status:{loggedIn: true}, user} 
+                          : {status:{loggedIn: false}, user: null};
 
   export const auth = {
     namespaced: true,
@@ -20,16 +21,8 @@ const initialState = user ? {status:{loggedIn: true}, user }
           }
         );
       },
-      // refresh (){
-      //   setInterval(() => {
-      //     // const token = Cookies.get('name');
-      //     // if (!token) {
-      //     //   Cookies.set('name',axios.post('http://127.0.0.1:3031/api/session',{}),{expires:30/1440});
-      //     //   console.log(Cookies.getItem('name'))
-      //     // }
-      //     Cookies.set('name',axios.post('http://127.0.0.1:3031/api/session',{}),{expires:30/1440});
-      //     console.log(Cookies.getItem('name'))
-      //   }, 30 * 1000);
+      // checkRole({ commit }, permission) {
+      //   commit('Authorization',permission);
       // },
       logout({ commit }) {
         AuthService.logout();
@@ -41,6 +34,9 @@ const initialState = user ? {status:{loggedIn: true}, user }
         state.status.loggedIn = true;
         state.user = user;
       },
+      // Authorization(state, permission) {
+      //   state.permission = permission;
+      // },
       loginFailure(state) {
         state.status.loggedIn = false;
         state.user = null;

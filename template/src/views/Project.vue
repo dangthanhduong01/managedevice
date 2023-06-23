@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '../common/http-common';
 
 export default {
     name: "Project",
@@ -146,7 +146,7 @@ export default {
 
         // Lấy toàn bộ project trong database(ok)
         getAllProject() {
-            axios.get(`http://localhost:3031/api/project`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/project`)
                 .then(res => {
                 this.allProject = res.data;
             }).catch(e => {
@@ -155,7 +155,7 @@ export default {
         },
         // Lấy toàn bộ phần cứng trong database(ok)
         getAllDevice() {
-            axios.get(`http://localhost:3031/api/device`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/device`)
                 .then(res => {
                 this.allDevice = res.data;
             }).catch(e => {
@@ -164,7 +164,7 @@ export default {
         },
         // Lấy toàn bộ phần mềm trong database (ok)
         getAllSoftware() {
-            axios.get(`http://localhost:3031/api/software`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/software`)
                 .then(res => {
                 this.allSoftware = res.data;
             }).catch(e => {
@@ -173,7 +173,7 @@ export default {
         },
         // lấy toàn bộ phần cứng không có trong project
         getAllDeviceNotInProject(id) {
-            axios.get(`http://localhost:3031/api/devicenotinproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/devicenotinproject/${id}`)
                 .then(res => {
                 this.allDevice = res.data;
                 // this.checkedDevice= res.data.map(d=>d.id);
@@ -183,7 +183,7 @@ export default {
         },
         // lấy toàn bộ phần mềm không có trong project
         getAllSoftwareNotInProject(id) {
-            axios.get(`http://localhost:3031/api/softwarenotinproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/softwarenotinproject/${id}`)
                 .then(res => {
                 this.allSoftware = res.data;
             }).catch(e => {
@@ -192,7 +192,7 @@ export default {
         },
         // lấy toàn bộ phần cứng có trong project (ok)
         getAllDeviceByProjectId(id) {
-            axios.get(`http://localhost:3031/api/devicebyproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/devicebyproject/${id}`)
                 .then(res => {
                 this.allDeviceByProjectId = res.data;
             }).catch(e => {
@@ -201,7 +201,7 @@ export default {
         },
         // lấy toàn bộ phần mềm có trong project (ok)
         getAllSoftwareByProjectId(id) {
-            axios.get(`http://localhost:3031/api/softwarebyproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/softwarebyproject/${id}`)
                 .then(res => {
                 this.allSoftwareByProjectId = res.data;
             }).catch(e => {
@@ -213,7 +213,7 @@ export default {
             let d = {
                 ten: this.project
             }
-            axios.post("http://localhost:3031/api/project", d)
+            axiosInstance.post("http://192.168.25.50:3031/api/project", d)
                 .then(res => {
                 console.log(res.data);
                 this.allProject.push(d);
@@ -235,7 +235,7 @@ export default {
                     this.allDevice.splice(d, 1);
                     let radio = document.getElementById('radio1_'+this.selectedDevice[d].id);
                     radio.checked = false;
-                    await axios.post("http://localhost:3031/api/addDevicetoProject", dt)
+                    await axiosInstance.post("http://192.168.25.50:3031/api/addDevicetoProject", dt)
                         .catch(e => {
                         console.log(e);
                     });
@@ -259,7 +259,7 @@ export default {
                     this.allSoftware.splice(s, 1);
                     let radio = document.getElementById('radio2_'+this.selectedSoftware[s].id);
                     radio.checked = false;
-                    await axios.post("http://localhost:3031/api/addSoftwaretoProject", dt)
+                    await axiosInstance.post("http://192.168.25.50:3031/api/addSoftwaretoProject", dt)
                         .catch(e => {
                         console.log(e);
                     });
@@ -291,7 +291,7 @@ export default {
         },
         removeDeviceFromProject(device, id_project) {
             let id_device = device.id_device;
-            axios.delete(`http://localhost:3031/api/removedevicefromproject/${id_device}/${id_project}`)
+            axiosInstance.delete(`http://192.168.25.50:3031/api/removedevicefromproject/${id_device}/${id_project}`)
                 .then(res => {
                 let index = this.allDeviceByProjectId.findIndex(dv => dv.id_device === id_device);
                 if (index !== -1) {
@@ -305,7 +305,7 @@ export default {
         },
         removeSoftwareFromProject(software, id_project) {
             let id_software = software.id_software;
-            axios.delete(`http://localhost:3031/api/removesoftwarefromproject/${id_software}/${id_project}`)
+            axiosInstance.delete(`http://192.168.25.50:3031/api/removesoftwarefromproject/${id_software}/${id_project}`)
                 .then(res => {
                 let index = this.allSoftwareByProjectId.findIndex(sw => sw.id_software === id_software);
                 if (index !== -1) {

@@ -1,6 +1,9 @@
 const app = require('fastify')();
+const dotenv = require('dotenv');
+dotenv.config();
 const fs = require('fs')
-const { routes, verify, authenticate } = require('./jwt');
+const { routes, verify, authenticate,
+    isReadable,isWriteable,isAdmin,isAdminOrWriteable } = require('./jwt');
 app.register(routes);
 const {getAllDevice, addDevice,getDeviceById,updateDevice,
     getAllSoftware, addSoftware,getSoftwareById,updateSoftware,
@@ -9,13 +12,33 @@ const {getAllDevice, addDevice,getDeviceById,updateDevice,
     getAllDeviceNotInProject,getAllSoftwareNotInProject,
     deleteDeviceOnProject,deleteSoftwareOnProject,
     deleteDevice,deleteSoftware,
-    seeAllHistoryofDevice,updateHistoryofDevice,addHistoryofDevice,deleteHistory} = require("./device");
+    seeAllHistoryofDevice,updateHistoryofDevice,addHistoryofDevice,deleteHistory,
+    getCountDeviceofProject,getCountSoftwareofProject,
+    getAllTypeofDevice,addTypeDevice,getStatisTypeDevice,getColumnName,getAllDeviceByType} = require("./device");
+
 
 
 app.register(require("@fastify/cors"),{
-    origin:"http://localhost:8080",
+    origin:"*",
 });
 
+
+app.addHook('preHandler',(req,reply,next) => {
+    next();
+    // if(req.routerPath !=='/auth/login' && req.routerPath !== '/api/device') {
+    //     authenticate(req,reply,next);
+    // }else{
+    //     next();
+    // }
+});
+
+app.addHook('onRequest', (req, res, next) => {
+    res.header(
+      'Access-Control-Allow-Headers',
+      'x-access-token, Origin, Content-Type, Accept'
+    );
+    next();
+  });
 
 
 app.get("/api/device", getAllDevice);
@@ -42,11 +65,19 @@ app.get('/api/allHistoryofDevice/:id',seeAllHistoryofDevice);
 app.put('/api/history/:id',updateHistoryofDevice);
 app.post('/api/addHistory',addHistoryofDevice);
 app.delete('/api/deleteHistory/:id',deleteHistory);
-
+app.get("/api/countDeviceOfProject/:id",getCountDeviceofProject);
+app.get("/api/countSoftwareOfProject/:id",getCountSoftwareofProject);
+app.get("/api/getAllTypeofDevice",getAllTypeofDevice);
+app.post("/api/addTypeDevice",addTypeDevice);
+app.get("/api/getStatisTypeDevice",getStatisTypeDevice);
+app.get("/api/Column",getColumnName);
+app.get("/api/getAllDeviceByType/:id",getAllDeviceByType);
+const host = '192.168.25.50' || '0.0.0.0';
+const port = process.env.PORT || 3031;
 
 const start = async () => {
     try {
-        app.listen(3031, (err, address) => {
+        app.listen(port,host, (err, address) => {
             if (err) {
                 console.log(err);
                 process.exit(1);

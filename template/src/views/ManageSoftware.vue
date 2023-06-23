@@ -3,11 +3,23 @@
         <CRow>
             <CCol :md="12">
                 <CCard class="mb-4">
-                    <CCardHeader> Quản lí Phần mềm </CCardHeader>
+                    <CCardHeader> 
+                        Quản lí Phần mềm
+                        <br>
+                        <div style="padding: 5px;"></div>
+                        <Row>
+                            <CButton color="success" style="max-width: 120px;margin-right: 2px;">
+                                <router-link style="text-decoration: none;color: black;" :to="'/addNew/'">Thêm</router-link>
+                            </CButton>  
+                            <CButton  color="success" @click="handleExport">
+                                Export
+                            </CButton>
+                        </Row>
+                    </CCardHeader>
                     <CCardBody>
                         <CTable align="middle" class="mb-0 border" hover responsive>
                             <CTableHead color="light">
-                                <CTableRow>
+                                <CTableRow class="text-center">
                                     <CTableHeaderCell class="text-center">Tên phần mềm</CTableHeaderCell>
                                     <CTableHeaderCell>Model</CTableHeaderCell>
                                     <CTableHeaderCell>IP</CTableHeaderCell>
@@ -20,8 +32,8 @@
                                 </CTableRow>
                             </CTableHead>
                             <CTableBody>
-                                <CTableRow v-for="s in softwares" :key="s.ten">
-                                    <CTableDataCell class="text-center">
+                                <CTableRow v-for="s in softwares" :key="s.ten" class="text-center">
+                                    <CTableDataCell>
                                         {{ s.ten }}
                                     </CTableDataCell>
                                     <CTableDataCell>
@@ -30,7 +42,7 @@
                                     <CTableDataCell>
                                         {{ s.ip }}
                                     </CTableDataCell>
-                                    <CTableDataCell class="text-center">
+                                    <CTableDataCell>
                                         {{ s.mucdich }}
                                     </CTableDataCell>
                                     <CTableDataCell>
@@ -48,6 +60,9 @@
                                     <CTableDataCell>
                                         <CButton color="info"><router-link style="text-decoration: none;color: aliceblue;"
                                                 :to="'/software/' + s.id">Sửa</router-link></CButton>
+                                                <CButton color="danger" style="margin-left: 1%;" @click="visible = true">
+                                                    Xóa
+                                                </CButton>        
                                     </CTableDataCell>
                                 </CTableRow>
                             </CTableBody>
@@ -112,7 +127,8 @@
     </CModal>
 </template>
 <script>
-import axios from 'axios';
+import axiosInstance from '../common/http-common';
+import Papa from 'papaparse';
 export default {
     name: 'ManageSoftware',
     data() {
@@ -129,7 +145,7 @@ export default {
     computed: {},
     methods: {
         getAllSoftware() {
-            axios.get(`http://localhost:3031/api/software`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/software`)
                 .then(res => {
                 this.softwares = res.data;
                 console.log(this.softwares);
@@ -138,7 +154,7 @@ export default {
             });
         },
         seeAllHistory(id) {
-          axios.get(`http://localhost:3031/api/allHistoryofDevice/${id}`)
+          axiosInstance.get(`http://192.168.25.50:3031/api/allHistoryofDevice/${id}`)
           .then(res => {
             this.historyofDevice=res.data;
             this.currentHistoryOfDevice=id;
@@ -163,14 +179,34 @@ export default {
             chitiet: this.newHistory,
             id_device: this.currentHistoryOfDevice
           }
-          axios.post("http://localhost:3031/api/addHistory",data)
+          axiosInstance.post("http://192.168.25.50:3031/api/addHistory",data)
           .then(res => {
             this.newHistory = '';
             alert(res.data);
           }).catch(e =>{
             alert(e);
           });
-        }        
+        }, 
+        handleExport() {
+          const data = this.softwares;
+          // Chuyển đổi dữ liệu thành chuỗi CSV
+          const csv = Papa.unparse(data);
+
+          // Tạo một đối tượng Blob từ chuỗi CSV
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+          // Tạo một đường dẫn tới file
+          const url = URL.createObjectURL(blob);
+
+          // Tạo một phần tử a để tạo và tải xuống file CSV
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', 'data.csv');
+          link.click();
+
+          // Giải phóng đường dẫn tới file
+          URL.revokeObjectURL(url);     
+        }                
     },
     mounted() {
         this.getAllSoftware();

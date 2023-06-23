@@ -1,10 +1,10 @@
 const fastify = require('fastify')();
 const mysql = require('mysql');
-
+// process.env.DBHOST
 const pool = mysql.createPool({
-  host :process.env.DBHOST,
+  host :'127.0.0.1',
   user:"root",
-  password:"password",
+  password:"1234",
   post:"3306",
   database: "managedevice"
 });

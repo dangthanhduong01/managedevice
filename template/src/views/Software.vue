@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '../common/http-common';
 
 export default {
     name: 'Software',
@@ -122,7 +122,7 @@ export default {
     },
     methods: {
         getSoftwareById(id) {
-          axios.get(`http://localhost:3031/api/software/${id}`)
+          axiosInstance.get(`http://192.168.25.50:3031/api/software/${id}`)
             .then(res => {
               console.log(res.data);
               this.software = res.data[0];
@@ -139,7 +139,7 @@ export default {
             this.software.hientrang=this.hientrangkhac;
           }
           console.log(this.software);
-            axios.put(`http://localhost:3031/api/software/${id}`,this.software)
+            axiosInstance.put(`http://192.168.25.50:3031/api/software/${id}`,this.software)
                 .then(res => {
                 console.log(res.data);
                 this.getSoftwareById(id);
@@ -148,7 +148,7 @@ export default {
             });
         },
         deleteSoftware(id) {
-          axios.put(`http://localhost:3031/api/software/deleteSoftware/${id}`)
+          axiosInstance.put(`http://192.168.25.50:3031/api/software/deleteSoftware/${id}`)
             .then(res =>{
               res;
               this.$router.push({path:`/dashboard`});            

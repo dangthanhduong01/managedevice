@@ -1,12 +1,12 @@
 import { h, resolveComponent } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
-
+import { checkTokenExpiration } from './middleware'
 import DefaultLayout from '@/layouts/DefaultLayout'
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Dashboard',
     component: DefaultLayout,
     redirect: '/dashboard',
     children: [
@@ -16,9 +16,11 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () =>
-          import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
-      },
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
+        meta: {
+          requiresAuth: true,
+        }
+        },
       {
         path: '/device/:id',
         name: 'Device',
@@ -58,6 +60,11 @@ const routes = [
         path: '/allProject',
         name: 'ManageProject',
         component: () => import('@/views/ManageProject.vue'),
+      },
+      {
+        path: '/room',
+        name: 'Room',
+        component: () => import('@/views/Room.vue'),
       },                  
     ],
   },
@@ -90,6 +97,11 @@ const routes = [
     },
     children: [
       {
+        path: '403',
+        name: 'Page403',
+        component: () => import('@/views/pages/Page403'),
+      },      
+      {
         path: '404',
         name: 'Page404',
         component: () => import('@/views/pages/Page404'),
@@ -114,12 +126,28 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
+  history: createWebHashHistory('http://192.168.25.50:8080/'),
   routes,
   scrollBehavior() {
     // always scroll to top
     return { top: 0 }
   },
-})
+});
+
+router.beforeEach((to, from, next) => {
+  const publicPages = ['/login'];
+  const authRequired = !publicPages.includes(to.path);
+  const loggedIn = localStorage.getItem('user');
+  
+  if (authRequired && !loggedIn) {
+    next('/login');
+  } else if(to.meta.requiresAuth){
+    checkTokenExpiration(to,from,next);
+  } else {
+    next();
+  }
+
+});
+
 
 export default router

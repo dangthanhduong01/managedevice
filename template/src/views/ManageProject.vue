@@ -3,19 +3,18 @@
         <CRow>
             <CCol :xs="12">
                 <CCard>
-                    <CCardHeader>
-                        <strong>Danh sách Project</strong>
-                        <CDropdown style="margin-left: 70%;">
-                        <CDropdownToggle color="secondary">Danh sách dự án</CDropdownToggle>
-                        <CDropdownMenu>
-                            <div v-for="(p,index) in allProject" :key="index">
-                            <CDropdownItem @click="currentProject=p.id,handleClick=1,getAllDeviceByProjectId(p.id)">{{ p.ten }}</CDropdownItem>
-                            </div>
-                        </CDropdownMenu>
-                        </CDropdown>
+                    <CCardHeader style="background-color: #3c8dbc;">
+                        <CRow>
+                            <CCol xs="auto" class="me-auto">
+                                <strong>Danh sách Project</strong>
+                            </CCol>
+                            <CCol xs="auto">
+                                <CButton color="success" @click="() => { visibleHandler = 1 }">Thêm dự án</CButton>
+                            </CCol>
+                        </CRow>
                     </CCardHeader>
                     <CCardBody>
-                        <CNav variant="tabs" v-if="allProject !=null">
+                        <!-- <CNav variant="tabs" v-if="allProject !=null">
                             <CNavItem>
                                 <CNavLink @click="handleClick=1,getAllDeviceByProjectId(currentProject)" :class="{active: handleClick==1}">
                                     Phần cứng
@@ -26,8 +25,33 @@
                                     Phần mềm
                                 </CNavLink>
                             </CNavItem>
-                        </CNav>
-                        <div v-if="handleClick==1">
+                        </CNav> -->
+                        <CTable bordered>
+                        <CTableHead>
+                            <CTableRow class="text-center">
+                                <CTableHeaderCell>ID</CTableHeaderCell>
+                                <CTableHeaderCell>Tên dự án</CTableHeaderCell>
+                                <CTableHeaderCell>Khởi tạo</CTableHeaderCell>
+                                <CTableHeaderCell>Cập nhật</CTableHeaderCell>
+                                <CTableHeaderCell>Ghi chú</CTableHeaderCell>
+                                <CTableHeaderCell>Xem chi tiết</CTableHeaderCell>
+                                <CTableHeaderCell colspan="2">Thay đổi</CTableHeaderCell>
+                            </CTableRow>
+                        </CTableHead>
+                        <CTableBody>
+                            <CTableRow v-for="(p,index) in allProject" :key="index" class="text-center">
+                                <CTableHeaderCell>{{ p.id }}</CTableHeaderCell>
+                                <CTableHeaderCell>{{ p.ten }}</CTableHeaderCell>
+                                <CTableHeaderCell>{{ p.created_at }}</CTableHeaderCell>
+                                <CTableHeaderCell>{{ p.update_at }}</CTableHeaderCell>
+                                <CTableHeaderCell>{{ p.ghichu }}</CTableHeaderCell>
+                                <CTableHeaderCell>Chọn</CTableHeaderCell>
+                                <CTableHeaderCell>Sửa</CTableHeaderCell>
+                                <CTableHeaderCell>Xóa</CTableHeaderCell>
+                            </CTableRow>
+                        </CTableBody>
+                        </CTable>
+                        <!-- <div v-if="handleClick==1">
                             <CTable align="middle" class="mb-0 border" hover responsive>
                                 <CTableHead color="light">
                                     <CTableRow>
@@ -111,7 +135,7 @@
                         </div>
                         <div v-else>
                             <p style="text-align: center;">Click on project</p>
-                        </div>
+                        </div> -->
                     </CCardBody> 
                 </CCard>
             </CCol>
@@ -185,10 +209,37 @@
             </CCol> -->
         </CRow>
     </div>
+<CModal backdrop="static" :visible="visibleHandler==1" @close="() => { visibleHandler = 0 }">
+    <CModalHeader>
+        <CModalTitle>Thêm dự án</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+        <br>
+        <CForm class="row g-3">
+            <CRow class="mb-3">
+                <CFormLabel for="tenduan" class="col-sm-3 col-form-label">Tên dự án</CFormLabel>
+                <div class="col-sm-8">
+                    <CFormInput type="text" id="tenduan" v-model="project.ten"/>
+                </div>
+                </CRow>
+                <CRow class="mb-3">
+                <CFormLabel for="ghichu" class="col-sm-3 col-form-label">Ghi chú</CFormLabel>
+                <div class="col-sm-8">
+                    <CFormInput type="text" id="ghichu" v-model="project.ghichu"/>
+                </div>  
+            </CRow>
+        </CForm>
+    </CModalBody>
+    <CModalFooter>
+        <CButton color="secondary" @click="() => { visibleHandler = 0 }">
+        Close
+        </CButton>
+        <CButton color="primary" @click="addProject()">Thêm</CButton>
+    </CModalFooter>
+</CModal>    
 </template>
 <script>
-import axios from 'axios';
-
+import axiosInstance from '../common/http-common';
 export default {
     name: "ManageProject",
     data() {
@@ -198,11 +249,16 @@ export default {
             allDeviceByProjectId: null,
             allSoftwareByProjectId: null,
             currentProject: null,
+            visibleHandler: 0,
+            project: {
+                ten: '',
+                ghichu: '',
+            }
         };
     },
     methods: {
         getAllProject() {
-            axios.get(`http://localhost:3031/api/project`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/project`)
                 .then(res => {
                 this.allProject = res.data;
                 console.log(this.allProject);
@@ -210,8 +266,19 @@ export default {
                 console.log(e);
             });
         },
+        addProject() {
+            console.log(this.project);
+            axiosInstance.post("http://192.168.25.50:3031/api/project", this.project)
+                .then(res => {
+                console.log(res.data);
+                this.allProject.push(this.project);
+                this.visibleHandler=0;
+            }).catch(e => {
+                alert(e);
+            });
+        },
         getAllDeviceByProjectId(id) {
-            axios.get(`http://localhost:3031/api/devicebyproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/devicebyproject/${id}`)
                 .then(res => {
                 this.allDeviceByProjectId = res.data;
             }).catch(e => {
@@ -220,7 +287,7 @@ export default {
         },
         // lấy toàn bộ phần mềm có trong project (ok)
         getAllSoftwareByProjectId(id) {
-            axios.get(`http://localhost:3031/api/softwarebyproject/${id}`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/softwarebyproject/${id}`)
                 .then(res => {
                 this.allSoftwareByProjectId = res.data;
             }).catch(e => {

@@ -102,18 +102,18 @@ const AppSidebarNav = defineComponent({
                           customClassName: 'nav-icon',
                           name: item.icon,
                         }),
-                      item.name,
-                      item.badge &&
-                        h(
-                          CBadge,
-                          {
-                            class: 'ms-auto',
-                            color: item.badge.color,
-                          },
-                          {
-                            default: () => item.badge.text,
-                          },
-                        ),
+                        item.name,
+                      // item.badge &&
+                      //   h(
+                      //     CBadge,
+                      //     {
+                      //       class: 'ms-auto',
+                      //       color: item.badge.color,
+                      //     },
+                      //     {
+                      //       default: () => item.badge.text,
+                      //     },
+                      //   ),
                     ],
                   },
                 ),

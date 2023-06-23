@@ -5,7 +5,7 @@
     </CRow>
     <CRow>
       <CCol :xs="4" style="text-align: center;">
-      <CWidgetStatsA class="mb-3" color="primary">
+      <CWidgetStatsA class="mb-3" color="danger">
         <template #value>Thiết bị: 
             {{ sumDevices }}
         </template>
@@ -80,16 +80,55 @@
       <CCard>
         <CCardHeader>
           <CDropdown>
-            <CDropdownToggle color="primary">Chọn Dự án</CDropdownToggle>
+            <CDropdownToggle color="warning" v-if="currentProject!=null">              
+                {{ currentProject.ten }}
+            </CDropdownToggle>
+            <CDropdownToggle color="warning" v-else>              
+                Chọn Dự án
+            </CDropdownToggle>            
             <CDropdownMenu>
-              <div v-for="(p) in allProject" :key="p.id">
-                <CDropdownItem >{{ p.ten }}</CDropdownItem>
+              <div v-for="(p,index) in allProject" :key="index">
+                <CDropdownItem :class="{active: index==currentIndex}"
+                @click="currentProject = p,getStatisDeviceOfProject(p),
+                getStatisSoftwareOfProject(p),currentIndex= index">
+                {{ p.ten }}</CDropdownItem>
               </div>
             </CDropdownMenu>
           </CDropdown>
         </CCardHeader>
         <CCardBody>
-          <CChartPie style="height: 250px; width: 250px; margin: auto" :data="defaultData" />
+          <CRow v-if="currentProject!=null">
+          <CCol :xs="6">
+            <CListGroup flush>
+              <CListGroupItem>Dự án: {{ currentProject.ten }}</CListGroupItem>
+              <CListGroupItem>Số thiết bị trong dự án: {{ DeviceOfCurrentProject }}</CListGroupItem>
+              <CListGroupItem>Số phần mềm trong dự án: {{ SoftwareOfCurrentProject }}</CListGroupItem>
+              <CListGroupItem><CButton color="info">Chi tiết</CButton></CListGroupItem>
+            </CListGroup>            
+          </CCol>
+          <CCol :xs="6">
+            <CChartPie style="height: 250px; width: 250px; margin: auto" :data="defaultData" />
+          </CCol>
+          </CRow>
+          <CRow v-else>
+            <CCol :xs="4">
+              <CRow class="text-center border "><strong>Thống kê tổng thể</strong></CRow>  
+              <CListGroup flush>
+                <CListGroupItem>Tổng Dự án: {{ allProjectLength }}</CListGroupItem>
+                <CListGroupItem>Tổng thiết bị: {{ sumDevices }}</CListGroupItem>
+                <CListGroupItem>Tổng phần mềm: {{ sumSoftware }}</CListGroupItem>
+                <CListGroupItem><CButton color="info">Chi tiết</CButton></CListGroupItem>
+              </CListGroup>            
+            </CCol>
+            <CCol :xs="4">
+              <CRow class="text-center border "><strong>Loại thiết bị</strong></CRow>
+              <CListGroup flush class="text-left">
+                <CListGroupItem v-for="t in statisTypeDevice" :key="t.id">
+                  <strong>{{ t.tenloai }} : </strong> {{ t.sl }}
+                </CListGroupItem>
+              </CListGroup>
+            </CCol>
+          </CRow>
         </CCardBody>
       </CCard>
     </CRow>
@@ -103,9 +142,9 @@
             Quản lí thiết bị 
           </CCardHeader>
           <CCardBody>
-            <CTable align="middle" class="mb-0 border" hover responsive>
+            <CTable align="middle" class="mb-0 border" hover responsive bordered>
               <CTableHead color="light">
-                <CTableRow>
+                <CTableRow class="text-center" style="padding:-0.5rem">
                   <CTableHeaderCell>Loại thiết bị</CTableHeaderCell>
                   <CTableHeaderCell>Tên thiết bị</CTableHeaderCell>
                   <CTableHeaderCell>Model</CTableHeaderCell>
@@ -121,7 +160,7 @@
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="d in devices" :key="d.ten">
+                <CTableRow v-for="d in devices" :key="d.ten" class="text-center">
                   <CTableDataCell>
                     {{ d.loaithietbi }}
                   </CTableDataCell>                  
@@ -151,13 +190,13 @@
                   </CTableDataCell> 
                   <CTableDataCell>
                     <CButton color="secondary" @click="() => {seeAllHistory(d.id),visibleHistory = true}">
-                      {{ d.lichsu }}
+                      <!-- {{ d.lichsu }} -->Xem lịch sử
                     </CButton>
                   </CTableDataCell>
                   <CTableDataCell>
                     {{ d.ghichu }}
                   </CTableDataCell>  
-                  <CTableDataCell>
+                  <CTableDataCell >
                     <CButton color="info"><router-link style="text-decoration: none;color: aliceblue;" :to="'/device/' + d.id">Sửa</router-link></CButton>
                   </CTableDataCell>                                                                                                          
                 </CTableRow>
@@ -176,11 +215,11 @@
           <CCardBody>
             <CTable align="middle" class="mb-0 border" hover responsive>
               <CTableHead color="light">
-                <CTableRow>
-                  <CTableHeaderCell class="text-center">Tên phần mềm</CTableHeaderCell>
+                <CTableRow class="text-center">
+                  <CTableHeaderCell>Tên phần mềm</CTableHeaderCell>
                   <CTableHeaderCell>Model</CTableHeaderCell>
                   <CTableHeaderCell>IP</CTableHeaderCell>
-                  <CTableHeaderCell class="text-center">Mục đích sử dụng</CTableHeaderCell>
+                  <CTableHeaderCell>Mục đích sử dụng</CTableHeaderCell>
                   <CTableHeaderCell>Vị trí cài đặt</CTableHeaderCell>
                   <CTableHeaderCell>Hiện trạng</CTableHeaderCell>
                   <CTableHeaderCell>Quản lí</CTableHeaderCell>
@@ -189,8 +228,8 @@
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="s in softwares" :key="s.ten">
-                  <CTableDataCell class="text-center">
+                <CTableRow v-for="s in softwares" :key="s.ten" class="text-center">
+                  <CTableDataCell>
                     {{ s.ten }}
                   </CTableDataCell>
                   <CTableDataCell>
@@ -199,7 +238,7 @@
                   <CTableDataCell >
                     {{ s.ip }}
                   </CTableDataCell>
-                  <CTableDataCell class="text-center">
+                  <CTableDataCell>
                     {{ s.mucdich }}
                   </CTableDataCell>
                   <CTableDataCell>
@@ -247,12 +286,13 @@
             <CTableDataCell>
               <CInputGroup class="mb-3">
                 <CFormInput placeholder="Edit history" v-model="editTextHistory" aria-label="Recipient's username" aria-describedby="button-addon2"/>
-                <CButton type="button" @click="updateHistory" color="info" variant="outline" id="button-addon2">Button</CButton>
+                <CButton type="button" @click="updateHistory(editHistory)" color="info" variant="outline" id="button-addon2">Sửa</CButton>
               </CInputGroup>            
             </CTableDataCell>
           </div>  
-          <CTableDataCell><CIcon @click="changeHistory(l.id)" icon="cilList" size="xl"/></CTableDataCell>
-          <CTableDataCell><CCloseButton style="" black/></CTableDataCell>
+          <CTableDataCell><CIcon @click="changeHistory(l.id)" icon="cilPencil" style="color:red" size="xl"/></CTableDataCell>
+          <!-- <CCloseButton style="" black/> -->
+          <CTableDataCell><CIcon @click="deleteHistory(l.id)" icon="cilTrash" style="color:rgb(251, 255, 0)" size="xl"/></CTableDataCell>
         </CTableRow>
         <CTableRow>
             <CTableDataCell colspan="2">
@@ -269,19 +309,22 @@
       <CButton color="secondary" @click="() => { visibleHistory = false }">
         Close
       </CButton>
-      <CButton color="primary">Save changes</CButton>
+      <!-- <CButton color="primary">Save changes</CButton> -->
     </CModalFooter>
   </CModal>
 </template>
 
 <script>
-import axios from 'axios';
-import { CChartPie } from '@coreui/vue-chartjs'
+import axiosInstance from '../common/http-common';
+import { CChartPie } from '@coreui/vue-chartjs';
+// import authHeader from '../services/auth-header';
   export default {
     name: "Dashboard",
     components: { CChartPie },
     data() {
         return {
+            currentProject: null,
+            currentIndex: -1,
             visibleHistory: false,
             devices: null,
             softwares: null,
@@ -295,34 +338,65 @@ import { CChartPie } from '@coreui/vue-chartjs'
             sumDevices: 0,
             sumSoftware: 0,
             statistic:0,
+            DeviceOfCurrentProject: 0,
+            SoftwareOfCurrentProject: 0,
+            statisTypeDevice: [],
         };
     },
     computed: {
+      currentUser() {
+        return this.$store.state.auth.user;
+      }, 
       defaultData() {
       return {
         labels: ['Phần cứng', 'Phần mềm'],
         datasets: [
           {
             backgroundColor: ['#41B883', '#E46651'],
-            data: [40, 20],
+            data: [this.DeviceOfCurrentProject, this.SoftwareOfCurrentProject],
           },
         ],
       }
     },
     },
     methods: {
-      getAllProject() {
-            axios.get(`http://localhost:3031/api/project`)
+        getStatisTypeDevice() {
+            axiosInstance.get('http://192.168.25.50:3031/api/getStatisTypeDevice')
+            .then(res =>{
+              console.log(res.data);
+              this.statisTypeDevice = Array.from(res.data);
+            }).catch (e =>{
+              console.log(e);
+            })
+        },
+        getAllProject() {
+          axiosInstance.get(`http://192.168.25.50:3031/api/project`)
                 .then(res => {
                 this.allProject = res.data;
                 this.allProjectLength = res.data.length;
-                console.log("tất cả :",this.allProject);
+                console.log("tất cả project :",this.allProject);
             }).catch(e => {
                 console.log(e);
             });
-        },      
+        },
+        getStatisDeviceOfProject(project) {
+          axiosInstance.get(`http://192.168.25.50:3031/api/countDeviceOfProject/${project.id}`)
+            .then(res => {
+              this.DeviceOfCurrentProject = res.data[0].sum;
+            }).catch(e=> {
+              console.log(e);
+            });
+        },    
+        getStatisSoftwareOfProject(project) {
+          axiosInstance.get(`http://192.168.25.50:3031/api/countSoftwareOfProject/${project.id}`)
+            .then(res => {
+              this.SoftwareOfCurrentProject = res.data[0].sum;
+            }).catch(e=> {
+              console.log(e);
+            });
+        },          
         getAllDevice() {
-            axios.get(`http://localhost:3031/api/device`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/device`,)
                 .then(res => {
                 this.devices = res.data;
                 console.log(this.devices);
@@ -331,16 +405,16 @@ import { CChartPie } from '@coreui/vue-chartjs'
                 console.log(e);
             });
         },
-        updateDevice(id) {
-            axios.put(`http://localhost:3031/api/device/${id}`)
-                .then(res => {
-                console.log(res.data);
-            }).catch(e => {
-                console.log(e);
-            });
-        },
+        // updateDevice(id) {
+        //     axiosInstance.put(`http://192.168.25.50:3031/api/device/${id}`)
+        //         .then(res => {
+        //         console.log(res.data);
+        //     }).catch(e => {
+        //         console.log(e);
+        //     });
+        // },
         getAllSoftware() {
-            axios.get(`http://localhost:3031/api/software`)
+            axiosInstance.get(`http://192.168.25.50:3031/api/software`)
                 .then(res => {
                 this.softwares = res.data;
                 console.log(this.softwares);
@@ -349,16 +423,16 @@ import { CChartPie } from '@coreui/vue-chartjs'
                 console.log(e);
             });
         },
-        updateSoftware(id) {
-            axios.put(`http://localhost:3031/api/software/${id}`)
-                .then(res => {
-                console.log(res.data);
-            }).catch(e => {
-                console.log(e);
-            });
-        },
+        // updateSoftware(id) {
+        //     axiosInstance.put(`http://192.168.25.50:3031/api/software/${id}`)
+        //         .then(res => {
+        //         console.log(res.data);
+        //     }).catch(e => {
+        //         console.log(e);
+        //     });
+        // },
         seeAllHistory(id) {
-          axios.get(`http://localhost:3031/api/allHistoryofDevice/${id}`)
+          axiosInstance.get(`http://192.168.25.50:3031/api/allHistoryofDevice/${id}`)
           .then(res => {
             this.historyofDevice=res.data;
             this.currentHistoryOfDevice=id;
@@ -366,8 +440,29 @@ import { CChartPie } from '@coreui/vue-chartjs'
             console.log(e);
           });
         },
-        updateHistory(){
+        updateHistory(id){
           console.log(this.editHistory,this.editTextHistory);
+          let data = {
+            chitiet: this.editTextHistory,
+          }
+          axiosInstance.put(`http://192.168.25.50:3031/api/history/${id}`,data)
+          .then(res=> {
+            alert(res.data);
+            this.editHistory=null;
+            this.seeAllHistory(id);
+            this.editTextHistory='';
+          }).catch(e=> {
+            alert(e);
+          });
+        },
+        deleteHistory(id) {
+          axiosInstance.delete(`http://192.168.25.50:3031/api/deleteHistory/${id}`)
+          .then(res => {
+            // alert(res.data);
+            this.seeAllHistory(id);
+          }).catch(e => {
+            alert(e);
+          })
         },
         changeHistory(id){
           if(this.editHistory !=id){
@@ -383,19 +478,28 @@ import { CChartPie } from '@coreui/vue-chartjs'
             chitiet: this.newHistory,
             id_device: this.currentHistoryOfDevice
           }
-          axios.post("http://localhost:3031/api/addHistory",data)
+          axiosInstance.post("http://192.168.25.50:3031/api/addHistory",data)
           .then(res => {
+            res;
+            this.seeAllHistory(id);
             this.newHistory = '';
-            alert(res.data);
           }).catch(e =>{
             alert(e);
           });
         }
     },
     mounted() {
+        if(!this.currentUser){
+          this.$router.push("/login");
+        }else{
+          console.log('test usr',this.currentUser);
+          console.log('test permission',this.currentPermission);
+        }
+        
         this.getAllDevice();
         this.getAllSoftware();
         this.getAllProject();
+        this.getStatisTypeDevice()
         this.historyofDevice = null;
         this.currentHistoryOfDevice=null;
         this.newHistory = '';

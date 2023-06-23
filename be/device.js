@@ -191,9 +191,9 @@ const addSoftwareIntoProject = async (req,reply) => {
 
 // INSERT INTO `managedevice`.`project` (`ten`) VALUES ('s')
 const addProject = async (req,reply) => {
-    let {ten} = req.body;
+    let {ten,ghichu} = req.body;
     try{
-        let data = await excuteQuery("INSERT INTO `managedevice`.`project` (`ten`) VALUES (?)",[ten]);
+        let data = await excuteQuery("INSERT INTO `managedevice`.`project` (`ten`,`ghichu`) VALUES (?,?)",[ten,ghichu]);
         reply.status(200).send('ok');
     }catch(e){
         reply.status(500).send(e);
@@ -231,9 +231,9 @@ const seeAllHistoryofDevice = async (req,reply) => {
 }
 const updateHistoryofDevice = async (req,reply) => {
     let id = req.params.id;
-    let {chitiet} = req.body;
     try {
-        await excuteQuery(`UPDATE managedevice.lichsu SET chitiet = ${chitiet} WHERE (id = ${id});`);
+        let {chitiet} = req.body;
+        await excuteQuery(`UPDATE managedevice.lichsu SET chitiet = ? WHERE id = ${id}`,[chitiet]);
         reply.status(200).send('thanh cong');
     }catch(e){
         reply.status(500).send(e);
@@ -259,6 +259,80 @@ const addHistoryofDevice = async (req,reply) => {
     }
 }
 
+const getCountDeviceofProject = async (req,reply) =>{
+    let id = req.params.id;
+    try {
+        let data = await excuteQuery(`select count(a.id_device) as sum From managedevice.pro_device a where a.id_project = ${id};`);
+        reply.status(200).send(data);
+    }catch(e) {
+        reply.status(500).send(e);
+    }
+}
+
+const getCountSoftwareofProject = async (req,reply) =>{
+    let id = req.params.id;
+    try {
+        let data = await excuteQuery(`select count(b.id_software) as sum from managedevice.pro_software b where b.id_project = ${id};`);
+        reply.status(200).send(data);
+    }catch(e) {
+        reply.status(500).send(e);
+    }
+}
+
+const getAllTypeofDevice = async (req,reply) => {
+    try {
+        let data = await excuteQuery('SELECT * FROM managedevice.loaithietbi;');
+        reply.status(200).send(data);
+    }catch (e) {
+        reply.status(500).send(e);
+    }
+}
+
+const addTypeDevice = async (req,reply) => {
+    
+    try {
+        let {typedevice} = req.body;
+        await excuteQuery('INSERT INTO `managedevice`.`loaithietbi` (`tenloai`) VALUES (?);',
+        [typedevice]);
+        reply.status(200).send("them thanh cong");
+    }catch (e) {
+        reply.status(500).send(e);
+    }
+}
+
+const getStatisTypeDevice = async (req,reply) => {
+    try{
+        let data = await excuteQuery(`select a.id,a.tenloai, count(b.loaithietbi) as sl 
+        from loaithietbi a left join device b 
+        on b.loaithietbi = a.id 
+        group by a.id,a.tenloai 
+        having sl>=0; `);
+        reply.status(200).send(data);
+    }catch (e) {
+        reply.status(500).send(e);
+    }
+}
+
+const getAllDeviceByType = async (req,reply) => {
+    let id =req.params.id;
+    try{
+        let data = await excuteQuery(`select * from device where loaithietbi = ${id}`);
+        reply.status(200).send(data);
+    }catch(e)  {
+        reply.status(500).send(e);
+    }
+}
+
+const getColumnName = async (req,reply) => {
+    try{
+        let columnName = req.body;
+        let data = await excuteQuery("SHOW COLUMNS FROM ?",[columnName]);
+        reply.status(200).send(data);
+    }catch (e) {
+        reply.status(500).send(e);
+    }
+}
+
 module.exports = { getAllDevice, addDevice,getDeviceById,updateDevice ,getAllSoftware,
     addSoftware,getSoftwareById,updateSoftware,
     getAllProject,getAllDeviceByProjectId,
@@ -267,4 +341,6 @@ module.exports = { getAllDevice, addDevice,getDeviceById,updateDevice ,getAllSof
     getAllDeviceNotInProject,getAllSoftwareNotInProject,
     deleteDeviceOnProject,deleteSoftwareOnProject,
     deleteDevice,deleteSoftware,
-    seeAllHistoryofDevice,updateHistoryofDevice,addHistoryofDevice,deleteHistory};
+    seeAllHistoryofDevice,updateHistoryofDevice,addHistoryofDevice,deleteHistory,
+    getCountDeviceofProject,getCountSoftwareofProject,
+    getAllTypeofDevice,addTypeDevice,getStatisTypeDevice,getColumnName,getAllDeviceByType};

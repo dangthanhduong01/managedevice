@@ -8,7 +8,7 @@
         <CIcon :icon="logo" height="48" alt="Logo" />
       </CHeaderBrand>
       <CHeaderNav class="d-none d-md-flex me-auto">
-        <CNavItem>
+        <!-- <CNavItem>
           <CNavLink href="/dashboard"> Dashboard </CNavLink>
         </CNavItem>
         <CNavItem>
@@ -19,25 +19,36 @@
         </CNavItem>
         <CNavItem>
           <CNavLink href="/#/allSoftware">Phần mềm</CNavLink>
-        </CNavItem>        
+        </CNavItem>         -->
       </CHeaderNav>
       <CHeaderNav>
-        <!-- <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-bell" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-list" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-envelope-open" size="lg" />
-          </CNavLink>
-        </CNavItem> -->
-        <AppHeaderDropdownAccnt />
+        <div v-if="currentUser">
+          <CDropdown variant="nav-item">
+            <CDropdownToggle placement="bottom-end" class="py-0" :caret="false">
+              <CAvatar :src="avatar" size="md" />
+            </CDropdownToggle>
+            <CDropdownMenu class="pt-0">
+              <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
+                Account
+              </CDropdownHeader>
+              <CDropdownItem>
+                <CButton>
+                 <CIcon icon="cil-user" /> Profile 
+                </CButton>
+              </CDropdownItem>
+              <CDropdownItem>
+                <CButton @click.prevent="logOut"> 
+                  <CIcon icon="cil-lock-locked" /> Logout
+                </CButton> 
+              </CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
+        </div>
+        <div v-else>
+          <CButton>
+            <CNavLink href="/#/login">Đăng nhập</CNavLink>
+          </CButton>
+        </div>
       </CHeaderNav>
     </CContainer>
     <CHeaderDivider />
@@ -48,19 +59,32 @@
 </template>
 
 <script>
-import AppBreadcrumb from './AppBreadcrumb'
-import AppHeaderDropdownAccnt from './AppHeaderDropdownAccnt'
+import AppBreadcrumb from './AppBreadcrumb.vue'
+import avatar from '@/assets/images/avatars/8.jpg'
+// import AppHeaderDropdownAccnt from './AppHeaderDropdownAccnt.vue'
 import { logo } from '@/assets/brand/logo'
 export default {
   name: 'AppHeader',
   components: {
     AppBreadcrumb,
-    AppHeaderDropdownAccnt,
-  },
+},
   setup() {
     return {
+      avatar: avatar,
       logo,
+      itemsCount: 42,
     }
   },
+  computed: {
+    currentUser() {
+        return this.$store.state.auth.user;
+      },
+  },
+  methods: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/login');
+    }
+  }
 }
 </script>

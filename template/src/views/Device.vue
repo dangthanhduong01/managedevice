@@ -132,8 +132,7 @@
 </template>
 
 <script>
-import axios from 'axios';
-
+import axiosInstance from '../common/http-common';
 export default {
   name: 'Device',
   data() {
@@ -159,7 +158,7 @@ export default {
   // },
   methods: {
     getDeviceById(id) {
-      axios.get(`http://localhost:3031/api/device/${id}`)
+      axiosInstance.get(`http://192.168.25.50:3031/api/device/${id}`)
         .then(res => {
           console.log(res.data);
           this.device = res.data[0];
@@ -189,7 +188,7 @@ export default {
       //   lichsu:this.device.lichsu,
       //   ghichu:this.device.ghichu
       // }
-      axios.put(`http://localhost:3031/api/device/${id}`, this.device)
+      axiosInstance.put(`http://192.168.25.50:3031/api/device/${id}`, this.device)
         .then(res => {
           console.log(res.data);
           this.getDeviceById(id);
@@ -199,7 +198,7 @@ export default {
     },
     deleteDevice(id) {
       console.log(id);
-      axios.put(`http://localhost:3031/api/device/deleteDevice/${id}`)
+      axiosInstance.put(`http://192.168.25.50:3031/api/device/deleteDevice/${id}`)
         .then(res =>{
           res;
           this.$router.push({path:`/dashboard`});            
