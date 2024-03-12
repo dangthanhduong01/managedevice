@@ -1,0 +1,64 @@
+version: '3.5'
+
+networks:
+  backend:
+    name: backend
+    driver: bridge
+
+services:
+    db: 
+      image: mysql:8.0
+      container_name: mysql
+      restart: always
+      expose:
+        - "3306"
+      environment:
+        MYSQL_ROOT_HOST: '127.0.0.1'
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_ALLOW_EMPTY_PASSWORD: ok
+        MYSQL_DATABASE: managedevice
+        MYSQL_PASSWORD: password
+      ports:
+        - 3306:3306
+      volumes:
+        - .data/mysql:/var/lib/mysql:rw
+        - ./data/manage.sql:/docker-entrypoint-initdb.d/manage.sql
+      # command: --init-file /docker-entrypoint-initdb.d/manage.sql
+      command:
+            --default-authentication-plugin=mysql_native_password
+            --character-set-server=utf8mb4
+            --collation-server=utf8mb4_unicode_ci
+            --wait_timeout=28800
+            --init-file /docker-entrypoint-initdb.d/manage.sql 
+      tmpfs:
+          - /run/mysqld:uid=999,gid=999
+          - /tmp         
+      networks:
+        - backend
+    be:
+      build:
+        dockerfile: Dockerfile
+        context: './be'
+      ports:
+        - 3031:3031
+      # command: sh -c 'while !</dev/tcp/db/3306; do sleep 1; done; npm start'
+      environment:
+        DB_USER: 'localuser'
+        MYSQL_DATABASE: 'managedevice'
+        MYSQL_PASSWORD: 'password'
+        MYSQL_HOST: 'localhost'
+      volumes:
+        - "./be:/backend"
+      networks:
+        - backend
+      depends_on:
+        - db
+      
+    fe:
+      build:
+        dockerfile: Dockerfile
+        context: './fe'
+      ports:
+        - "8080:8080"
+      depends_on:
+        - be

@@ -1,0 +1,1 @@
+docker compose exec -it db mysqldump -h localhost -u root -p  managedevice > mysqldump.sql
